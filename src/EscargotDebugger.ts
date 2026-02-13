@@ -402,7 +402,7 @@ class EscargotDebugSession extends DebugSession {
       args: DebugProtocol.EvaluateArguments): Promise<void> {
     try {
       const result: string =
-          await this._protocolhandler.evaluate(args.expression, 0);
+          await this._protocolhandler.evaluate(args.expression, args.context, 0);
 
       response.body = {result, variablesReference: 0};
 

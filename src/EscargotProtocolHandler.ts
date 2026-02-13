@@ -304,6 +304,11 @@ export class EscargotDebugProtocolHandler {
       [SP.SERVER.ESCARGOT_DEBUGGER_WAITING_AFTER_PENDING]:
           this.onWaitingAfterPending,
       [SP.SERVER.ESCARGOT_DEBUGGER_WAIT_FOR_WAIT_EXIT]: this.onWaitForWaitExit,
+
+      [SP.SERVER.ESCARGOT_DEBUGGER_WATCH_RESULT_8BIT]: this.onEvalResult,
+      [SP.SERVER.ESCARGOT_DEBUGGER_WATCH_RESULT_8BIT_END]: this.onEvalResult,
+      [SP.SERVER.ESCARGOT_DEBUGGER_WATCH_RESULT_16BIT]: this.onEvalResult,
+      [SP.SERVER.ESCARGOT_DEBUGGER_WATCH_RESULT_16BIT_END]: this.onEvalResult,
     };
 
     this.scopeNameMap = {
@@ -1008,7 +1013,15 @@ export class EscargotDebugProtocolHandler {
   public onEvalResult(data: Uint8Array): void {
     this.logPacket('Eval Result');
 
-    this.stringReceiverMessage = SP.SERVER.ESCARGOT_DEBUGGER_EVAL_RESULT_8BIT;
+    this.log("Evalresult: data[0]=" + data[0], LOG_LEVEL.NONE);
+
+    if (data[0] >= SP.SERVER.ESCARGOT_DEBUGGER_WATCH_RESULT_8BIT
+      && data[0] <= SP.SERVER.ESCARGOT_DEBUGGER_WATCH_RESULT_16BIT_END) {
+      this.stringReceiverMessage = SP.SERVER.ESCARGOT_DEBUGGER_WATCH_RESULT_8BIT;
+    } else {
+      this.stringReceiverMessage = SP.SERVER.ESCARGOT_DEBUGGER_EVAL_RESULT_8BIT;
+    }
+
     this.stringReceivedCb = this.onEvalResultEnd;
     return this.receiveString(data);
   }
@@ -1176,15 +1189,19 @@ export class EscargotDebugProtocolHandler {
     return request;
   }
 
-  public async evaluate(expression: string, index: number): Promise<any> {
+  public async evaluate(expression: string, context: string, index: number): Promise<any> {
     let request = new PendingEvalRequest();
     this.evalsPending.push(request);
 
-    await this.sendString(
-        this.lastBreakpointHit ?
-            SP.CLIENT.ESCARGOT_DEBUGGER_EVAL_8BIT_START :
-            SP.CLIENT.ESCARGOT_DEBUGGER_EVAL_WITHOUT_STOP_8BIT_START,
-        expression, true);
+    if (context === "watch") {
+      await this.sendString(SP.CLIENT.ESCARGOT_MESSAGE_WATCH_8BIT_START, expression, true);
+    } else {
+      await this.sendString(
+          this.lastBreakpointHit ?
+              SP.CLIENT.ESCARGOT_DEBUGGER_EVAL_8BIT_START :
+              SP.CLIENT.ESCARGOT_DEBUGGER_EVAL_WITHOUT_STOP_8BIT_START,
+          expression, true);
+    }
 
     return request.promise;
   }
