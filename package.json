@@ -73,6 +73,12 @@
     "out/**"
   ],
   "contributes": {
+    "commands": [
+      {
+        "command": "escargot-debug.onTakeHeapSnapshot",
+        "title": "Escargot: Take Heap Snapshot"
+      }
+    ],
     "breakpoints": [
       {
         "language": "javascript"

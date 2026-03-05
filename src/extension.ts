@@ -149,11 +149,18 @@ const processCustomEvent =
   return true;
 };
 
+const takeHeapSnapshot = (): void => {
+  vscode.debug.activeDebugSession.customRequest('takeHeapSnapshot');
+};
+
 export const activate = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
       vscode.commands.registerCommand(
           'escargot-debug.provideInitialConfigurations',
           provideInitialConfigurations),
+      vscode.commands.registerCommand(
+          'escargot-debug.onTakeHeapSnapshot',
+          takeHeapSnapshot),
       vscode.debug.onDidReceiveDebugSessionCustomEvent(
           e => processCustomEvent(e)));
 };

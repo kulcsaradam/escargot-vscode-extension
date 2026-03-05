@@ -502,6 +502,10 @@ class EscargotDebugSession extends DebugSession {
             });
         return;
       }
+      case 'takeHeapSnapshot': {
+       this._protocolhandler.onTakeHeapSnapshot();
+       return;
+      }
       default:
         super.customRequest(command, response, args);
     }

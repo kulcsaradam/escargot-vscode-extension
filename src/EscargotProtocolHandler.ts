@@ -1324,6 +1324,11 @@ export class EscargotDebugProtocolHandler {
     this.waitBeforeExit = value;
   }
 
+  public onTakeHeapSnapshot(): void {
+    this.logPacket('onTakeHeapSnapshot');
+    this.sendSimpleRequest(encodeMessage(this.byteConfig, 'B', [SP.CLIENT.ESCARGOT_DEBUGGER_TAKE_HEAP_SNAPSHOT]));
+  }
+
   private onWaitForWaitExit(): void {
     this.logPacket('onWaitForWaitExit');
 
